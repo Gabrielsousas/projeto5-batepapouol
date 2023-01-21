@@ -24,6 +24,10 @@ ion-icon {
   width: 42px;
 }
 
+main {
+  margin: 85px 0;
+}
+
 footer {
   height: 80px;
   position: fixed;
