@@ -9,16 +9,13 @@ getUserName();
 
 function getUserName() {
   let userName = prompt("Qual seu nome?");
-  const promise = axios
-    .post("https://mock-api.driven.com.br/api/v6/uol/participants", {
+  axios.post("https://mock-api.driven.com.br/api/v6/uol/participants", {
       name: userName,
     })
     .then((response) => {
       console.log(response.data);
       activeUser = userName;
-      setInterval(() => {
-        verificaUserOnline();
-      }, 5000);
+      setInterval(() => {verificaUserOnline()},5000);
     })
 
     .catch((error) => {
@@ -26,42 +23,45 @@ function getUserName() {
       if (errorMesage === 400) {
         alert("Este nome de usuário já está sendo utilizado");
       }
+      window.location.reload();
       console.log(error);
     });
 }
 
-setInterval(() => {
-  pegarMensagensNoServidor();
-}, 3000);
+pegarMensagensNoServidor();
+
 
 function verificaUserOnline() {
-  const promise = axios
-    .post("https://mock-api.driven.com.br/api/v6/uol/status", {
-      name: activeUser,
-    })
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.log("Você foi desconectado. Por favor recarregue a pagina");
-    });
+
+    axios.post("https://mock-api.driven.com.br/api/v6/uol/status", {
+        name: activeUser,
+      })
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log("Você foi desconectado. Por favor recarregue a pagina");
+      });
 }
 
 function pegarMensagensNoServidor() {
-  const promise = axios
-    .get("https://mock-api.driven.com.br/api/v6/uol/messages")
-    .then((response) => {
-      mensagens = response.data;
-      principal.innerHTML = "";
-      adicionarMensagemNoHTML();
-      const lastChild = principal.lastElementChild;
-      lastChild.scrollIntoView();
-    })
-    .catch((error) => {
-      console.log(error);
-      window.location.reload();
-    });
+  setInterval(() => {
+    axios
+      .get("https://mock-api.driven.com.br/api/v6/uol/messages")
+      .then((response) => {
+        mensagens = response.data;
+        principal.innerHTML = "";
+        adicionarMensagemNoHTML();
+        const lastChild = principal.lastElementChild;
+        lastChild.scrollIntoView();
+      })
+      .catch((error) => {
+        console.log(error);
+        window.location.reload();
+      });
+  }, 3000);
 }
+
 function adicionarMensagemNoHTML() {
   for (let i = 0; i < mensagens.length; i++) {
     const tempo = `(${mensagens[i].time})`;
@@ -104,7 +104,7 @@ function adicionarMensagemNoHTML() {
 
 function enviarMensagem() {
   let mensagemEnviar = document.querySelector("input").value;
-  const promise = axios
+  axios
     .post("https://mock-api.driven.com.br/api/v6/uol/messages", {
       from: activeUser,
       to: "Todos",
@@ -112,7 +112,7 @@ function enviarMensagem() {
       type: "message",
     })
     .then((response) => {
-      pegarMensagensNoServidor();
+      adicionarMensagemNoHTML();
       console.log(response.data);
       mensagemEnviar.value = "";
     })
@@ -120,6 +120,5 @@ function enviarMensagem() {
       console.log(
         "Não foi possivel enviar a mensagem por alguma magia desconhecida"
       );
-      window.location.reload();
     });
 }
