@@ -2,10 +2,6 @@ let activeUser;
 
 let mensagens;
 
-let mensagemStatus;
-let mensagemNormal;
-let mensagemPrivada;
-
 const principal = document.querySelector("main");
 principal.innerHTML = "";
 
@@ -13,29 +9,31 @@ getUserName();
 
 function getUserName() {
   let userName = prompt("Qual seu nome?");
-  axios
-    .post("https://mock-api.driven.com.br/api/v6/uol/participants", {
+  axios.post("https://mock-api.driven.com.br/api/v6/uol/participants", {
       name: userName,
     })
     .then((response) => {
       console.log(response.data);
       activeUser = userName;
-      verificaUserOnline();
+      setInterval(() => {verificaUserOnline()},5000);
     })
+
     .catch((error) => {
       let errorMesage = error.response.status;
       if (errorMesage === 400) {
-        alert("Este nome de usuário já está sendo utilizado")
-      }window.location.reload();
+        alert("Este nome de usuário já está sendo utilizado");
+      }
+      window.location.reload();
       console.log(error);
     });
 }
 
 pegarMensagensNoServidor();
+
+
 function verificaUserOnline() {
-  setInterval(() => {
-    axios
-      .post("https://mock-api.driven.com.br/api/v6/uol/status", {
+
+    axios.post("https://mock-api.driven.com.br/api/v6/uol/status", {
         name: activeUser,
       })
       .then((response) => {
@@ -44,7 +42,6 @@ function verificaUserOnline() {
       .catch((error) => {
         console.log("Você foi desconectado. Por favor recarregue a pagina");
       });
-  }, 5000);
 }
 
 function pegarMensagensNoServidor() {
@@ -60,6 +57,7 @@ function pegarMensagensNoServidor() {
       })
       .catch((error) => {
         console.log(error);
+        window.location.reload();
       });
   }, 3000);
 }
@@ -88,7 +86,10 @@ function adicionarMensagemNoHTML() {
             ${texto} 
         </div>
     `;
-    } else if (mensagens[i].type === "private_message" && (mensagens[i].from === activeUser || mensagens[i].to === activeUser)) {
+    } else if (
+      mensagens[i].type === "private_message" &&
+      (mensagens[i].from === activeUser || mensagens[i].to === activeUser)
+    ) {
       principal.innerHTML += `
         <div class="mensagem-privada" data-test="message">
           <span class="time-style">${tempo}</span>
@@ -111,7 +112,7 @@ function enviarMensagem() {
       type: "message",
     })
     .then((response) => {
-      pegarMensagensNoServidor();
+      adicionarMensagemNoHTML();
       console.log(response.data);
       mensagemEnviar.value = "";
     })
