@@ -7,13 +7,11 @@ principal.innerHTML = "";
 
 getUserName();
 
-setInterval(() => {
-  pegarMensagensNoServidor();
-}, 3000);
+
 
 function getUserName() {
-  let userName = prompt("Qual seu nome?");
-  const promise = axios.post("https://mock-api.driven.com.br/api/v6/uol/participants", {
+  const userName = prompt("Qual seu nome?");
+  axios.post("https://mock-api.driven.com.br/api/v6/uol/participants", {
       name: userName,
     })
     .then((response) => {
@@ -22,10 +20,13 @@ function getUserName() {
       setInterval(() => {
         verificaUserOnline();
       }, 5000);
+      setInterval(() => {
+        pegarMensagensNoServidor();
+      }, 3000);
     })
 
     .catch((error) => {
-      let errorMesage = error.response.status;
+      const errorMesage = error.response.status;
       if (errorMesage === 400) {
         alert("Este nome de usuário já está sendo utilizado");
       }
@@ -35,19 +36,20 @@ function getUserName() {
 }
 
 function verificaUserOnline() {
-  const promise = axios.post("https://mock-api.driven.com.br/api/v6/uol/status", {
+  axios.post("https://mock-api.driven.com.br/api/v6/uol/status", {
       name: activeUser,
     })
     .then((response) => {
       console.log(response.data);
     })
     .catch((error) => {
-      console.log("Você foi desconectado. Por favor recarregue a pagina");
+      alert("você foi desconectado")
+      window.location.reload;
     });
 }
 
 function pegarMensagensNoServidor() {
-  const promise = axios.get("https://mock-api.driven.com.br/api/v6/uol/messages")
+  axios.get("https://mock-api.driven.com.br/api/v6/uol/messages")
     .then((response) => {
       mensagens = response.data;
       principal.innerHTML = "";
@@ -103,7 +105,7 @@ function adicionarMensagemNoHTML() {
 
 function enviarMensagem() {
   let mensagemEnviar = document.querySelector("input").value;
-  const promise = axios.post("https://mock-api.driven.com.br/api/v6/uol/messages", {
+  axios.post("https://mock-api.driven.com.br/api/v6/uol/messages", {
       from: activeUser,
       to: "Todos",
       text: mensagemEnviar,
