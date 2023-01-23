@@ -73,7 +73,7 @@ function adicionarMensagemNoHTML() {
 
     if (mensagens[i].type === "status") {
       principal.innerHTML += `
-        <div class="mensagem-status">
+        <div class="mensagem-status" data-test="message">
           <span class="time-style">${tempo}</span>
           <span class="name-style">${sender}</span> 
             ${texto} 
@@ -81,7 +81,7 @@ function adicionarMensagemNoHTML() {
     `;
     } else if (mensagens[i].type === "message") {
       principal.innerHTML += `
-        <div class="mensagem">
+        <div class="mensagem" data-test="message">
           <span class="time-style">${tempo}</span>
           <span class="name-style"> ${sender} </span> para 
           <span class="name-style">${receiver}:</span> 
@@ -90,7 +90,7 @@ function adicionarMensagemNoHTML() {
     `;
     } else if (mensagens[i].type === "private_message" && (mensagens[i].from === activeUser || mensagens[i].to === activeUser)) {
       principal.innerHTML += `
-        <div class="mensagem-privada">
+        <div class="mensagem-privada" data-test="message">
           <span class="time-style">${tempo}</span>
           <span class="name-style"> ${sender}</span>: para 
           <span class="name-style"> ${receiver}:</span>
