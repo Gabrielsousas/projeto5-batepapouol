@@ -25,8 +25,8 @@ function getUserName() {
     .catch((error) => {
       let errorMesage = error.response.status;
       if (errorMesage === 400) {
-        getUserName();
-      }
+        alert("Este nome de usuário já está sendo utilizado")
+      }window.location.reload();
       console.log(error);
     });
 }
