@@ -7,7 +7,6 @@ let mensagemNormal;
 let mensagemPrivada;
 
 const principal = document.querySelector("main");
-
 principal.innerHTML = "";
 
 getUserName();
@@ -22,7 +21,6 @@ function getUserName() {
       console.log(response.data);
       activeUser = userName;
       verificaUserOnline();
-      mostrarMensagens();
     })
     .catch((error) => {
       let errorMesage = error.response.status;
@@ -33,6 +31,7 @@ function getUserName() {
     });
 }
 
+pegarMensagensNoServidor();
 function verificaUserOnline() {
   setInterval(() => {
     axios
@@ -48,50 +47,77 @@ function verificaUserOnline() {
   }, 5000);
 }
 
-function mostrarMensagens() {
-  //essa só está conseguindo ler as mensagens por enquanto
-  axios
-    .get("https://mock-api.driven.com.br/api/v6/uol/messages")
-    .then((response) => {
-      principal.innerHTML = "     ";
-              mensagens = response.data;
-      adicionarMensagemNoHTML();
-    })
-    .catch((error) => {
-      console.log(
-        "Não foi possível carregar as mensagens. Por favor recarregue a pagina"
-      );
-    });
+function pegarMensagensNoServidor() {
+  setInterval(() => {
+    axios
+      .get("https://mock-api.driven.com.br/api/v6/uol/messages")
+      .then((response) => {
+        mensagens = response.data;
+        principal.innerHTML = "";
+        adicionarMensagemNoHTML();
+        const lastChild = principal.lastElementChild;
+        lastChild.scrollIntoView();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, 3000);
 }
 
 function adicionarMensagemNoHTML() {
-  console.log(mensagens);
   for (let i = 0; i < mensagens.length; i++) {
     const tempo = `(${mensagens[i].time})`;
     const sender = `${mensagens[i].from}`;
     const texto = `${mensagens[i].text}`;
     const receiver = `${mensagens[i].to}`;
 
-    console.log(mensagens[i].type);
-
     if (mensagens[i].type === "status") {
       principal.innerHTML += `
-        <div class="mensagem-status"><span class="time-style">${tempo}</span>
-        <span class="name-style"> ${sender} </span> ${texto} 
+        <div class="mensagem-status">
+          <span class="time-style">${tempo}</span>
+          <span class="name-style">${sender}</span> 
+            ${texto} 
         </div>
     `;
     } else if (mensagens[i].type === "message") {
       principal.innerHTML += `
-        <div class="mensagem"><span class="time-style">${tempo}</span>
-          <span class="name-style"> ${sender} </span> para <span class="name-style">${receiver}:</span> ${texto} 
+        <div class="mensagem">
+          <span class="time-style">${tempo}</span>
+          <span class="name-style"> ${sender} </span> para 
+          <span class="name-style">${receiver}:</span> 
+            ${texto} 
         </div>
     `;
-    } else if (mensagens[i].type === "private_message") {
+    } else if (mensagens[i].type === "private_message" && (mensagens[i].from === activeUser || mensagens[i].to === activeUser)) {
       principal.innerHTML += `
-        <div class="mensagem-privada"><span class="time-style">${tempo}</span>
-          <span class="name-style"> ${sender}</span>: para <span class="name-style"> ${receiver}:</span> ${texto}
+        <div class="mensagem-privada">
+          <span class="time-style">${tempo}</span>
+          <span class="name-style"> ${sender}</span>: para 
+          <span class="name-style"> ${receiver}:</span>
+            ${texto}
         </div>
     `;
     }
   }
+}
+
+function enviarMensagem() {
+  let mensagemEnviar = document.querySelector("input").value;
+  axios
+    .post("https://mock-api.driven.com.br/api/v6/uol/messages", {
+      from: activeUser,
+      to: "Todos",
+      text: mensagemEnviar,
+      type: "message",
+    })
+    .then((response) => {
+      pegarMensagensNoServidor();
+      console.log(response.data);
+      mensagemEnviar.value = "";
+    })
+    .catch((error) => {
+      console.log(
+        "Não foi possivel enviar a mensagem por alguma magia desconhecida"
+      );
+    });
 }
